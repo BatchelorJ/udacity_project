@@ -3,7 +3,7 @@ import datetime
 import pandas as pd
 import numpy as np
 
-CITY_DATA = {'chicago': 'chicago.csv',
+city_data = {'chicago': 'chicago.csv',
              'new york city': 'new_york_city.csv',
              'washington': 'washington.csv'}
 
@@ -27,7 +27,7 @@ def get_filters():
     if city[:8] == 'chicago':
         city = 'chicago'
     elif city[:8] == 'new york':
-        city = 'new york'
+        city = 'new york city'
     elif city[:8] == 'washint':
         city = 'washington'
 
@@ -98,13 +98,9 @@ def load_data(city, month=0, day=0):
     """
 
     # Specify source data depending on city input
-    if city == 'chicago':
-        city_csv = 'chicago.csv'
-    elif city == 'new york':
-        city_csv = 'new_york_city.csv'
-    elif city == 'washington':
-        city_csv = 'washington.csv'
-    else:
+    try:
+        city_csv = city_data[city]
+    except KeyError:
         raise NameError('no data available for city {}'.format(city))
 
     # create pandas dataframe from csv, rename columns and cast dates to Timestamp objects
@@ -203,16 +199,41 @@ def user_stats(df):
     print('\nCalculating User Stats...\n')
     start_time = time.time()
 
-    # remove rows with NaN values
-    df.dropna(axis=0, inplace=True)
+    # Calculate counts of user types
+    if 'user_type' in df:
+        user_counts = df['user_type'].dropna(axis=0).value_counts().rename('Count')
+        user_percent = df['user_type'].dropna(axis=0).value_counts(normalize=True).rename('Percentage')
+        df_user = pd.concat([user_counts, user_percent], axis=1)
+        df_user['Percentage'] = pd.Series(["{0:.2f}%".format(val * 100) for val in df_user['Percentage']],
+                                          index=df_user.index)
+        print('User Statistics by type of user\n' + '-'*40)
+        print(df_user)
+        print()
 
-    # Display counts of user types
+    else:
+        print('Sorry, no user type data available for this city')
 
-    # Display counts of gender
+    # Calculate gender statistics
+    if 'gender' in df:
+        gender_counts = df['gender'].dropna(axis=0).value_counts().rename('Count')
+        gender_percent = df['gender'].dropna(axis=0).value_counts(normalize=True).rename('Percentage')
+        df_gender = pd.concat([gender_counts, gender_percent], axis=1)
+        df_gender['Percentage'] = pd.Series(["{0:.2f}%".format(val * 100) for val in df_gender['Percentage']],
+                                            index=df_gender.index)
+        print('\nGender Statistics\n' + '-'*40)
+        print(df_gender)
+        print()
+    else:
+        print('Sorry, no gender data available for this city')
 
-
-    # Display earliest, most recent, and most common year of birth
-
+    # Calculate earliest, most recent, and most common year of birth
+    if 'birth_year' in df:
+        youngest = int(df['birth_year'].dropna(axis=0).max())
+        oldest = int(df['birth_year'].dropna(axis=0).min())
+        commonest = int(df['birth_year'].dropna(axis=0).mode()[0])
+        # TODO: print birth year
+    else:
+        print('Sorry, no birth year data available for this city')
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
