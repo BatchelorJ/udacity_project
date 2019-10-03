@@ -10,12 +10,10 @@ CITY_DATA = {'chicago': 'chicago.csv',
 
 def get_filters():
     """
-    Asks user to specify a city, month, and day to analyze.
-
-    Returns:
-        (str) city - name of the city to analyze
-        (str) month - name of the month to filter by, or "all" to apply no month filter
-        (str) day - name of the day of week to filter by, or "all" to apply no day filter
+    Asks user for input in selecting a city from predefined list, a month and a day
+    :return city: lowercase string either 'chicago', 'new york' or 'washington'
+    :return month: month of year (jan to june): integer in range 0 - 6 where 0 represents user selecting all months
+    :return day: day of week: integer in range 0 - 7 where 0 represents user selecting all days of week, monday is 1
     """
     print('Hello! Let\'s explore some US bikeshare data!')
 
@@ -25,18 +23,26 @@ def get_filters():
     while city[:8] not in ['chicago', 'new york', 'washingt']:
         city = input('Which city\'s data would you like to explore?: ').lower()
 
+    # tidy up user input
+    if city[:8] == 'chicago':
+        city = 'chicago'
+    elif city[:8] == 'new york':
+        city = 'new york'
+    elif city[:8] == 'washint':
+        city = 'washington'
+
     # get user input for month (all, january, february, ... , june)
     # start with dictionary of month names and their index
     months = {}
     month = ''
-    for i in range(1, 13):
+    for i in range(1, 7):
         months[i] = datetime.date(2019, i, 1).strftime('%B')
 
     # get input from users as either month number, month name or as all
     # store month as integer where 0 is all and 1-12 is Jan-Dec
     while month not in months.keys() and month != 0:
         try:
-            month = input('Which month are you interested in?: ')
+            month = input('Which month (January to June) are you interested in? (enter all for all months): ')
             month = int(month)
         except ValueError:
             for k, v in months.items():
@@ -57,7 +63,7 @@ def get_filters():
     # get input from users as either weekday number, weekday name or as all
     while day not in days.keys() and day != 0:
         try:
-            day = input('Which day of the week\'s data would you like to view?: ')
+            day = input('Which day of the week\'s data would you like to view? (enter all for all days): ')
             day = int(day)
         except ValueError:
             for k, v in days.items():
@@ -84,14 +90,11 @@ def get_filters():
 
 def load_data(city, month, day):
     """
-    Loads data for the specified city and filters by month and day if applicable.
-
-    Args:
-        (str) city - name of the city to analyze
-        (str) month - name of the month to filter by, or "all" to apply no month filter
-        (str) day - name of the day of week to filter by, or "all" to apply no day filter
-    Returns:
-        df - Pandas DataFrame containing city data filtered by month and day
+    Takes user-supplied inputs, reads in csv datasets to pandas dataframes and filters on parameters
+    :param city: lowercase string either 'chicago', 'new york' or 'washington'
+    :param month: month of year: integer in range 0 - 12 where 0 represents user selecting all months
+    :param day: day of week: integer in range 0 - 7 where 0 represents user selecting all days of week
+    :return:
     """
 
     # Specify source data depending on city input
@@ -99,7 +102,7 @@ def load_data(city, month, day):
         city_csv = 'chicago.csv'
     elif city == 'new york':
         city_csv = 'new_york_city.csv'
-    elif city == 'washingt':
+    elif city == 'washington':
         city_csv = 'washington.csv'
     else:
         raise NameError('no data available for city {}'.format(city))
@@ -118,13 +121,25 @@ def load_data(city, month, day):
     df['start_time'] = pd.to_datetime(df['start_time'])
     df['end_time'] = pd.to_datetime(df['end_time'])
 
-    # filter data based on month input
+    # check for valid month and day inputs
     if not isinstance(month, int) and month not in range(0, 13):
         raise ValueError('invalid month value: must be integer between 0 and 12')
+    elif not isinstance(day, int) and day not in range(0, 8):
+        raise ValueError('invalid day value: must be integer between 0 and 7')
+
+    # filter based on combination of day and month input
+    if day == 0 and month == 0:
+        pass
     elif month == 0:
-        pass    # skip filtering, return data for all months
+        df = df[df['start_time'].dt.dayofweek == day - 1]
+        pass
+    elif day == 0:
+        df = df[df['start_time'].dt.month == month]
+        pass
     else:
         df = df[df['start_time'].dt.month == month]
+        df = df[df['start_time'].dt.dayofweek == day - 1]
+
     return df
 
 
@@ -205,7 +220,8 @@ def user_stats(df):
 def main():
     while True:
         city, month, day = get_filters()
-#        df = load_data(city, month, day)
+        df = load_data(city, month, day)
+        print(df.head())
 #
 #        time_stats(df)
 #        station_stats(df)
