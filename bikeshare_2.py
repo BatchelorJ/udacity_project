@@ -88,7 +88,7 @@ def get_filters():
     return city, month, day
 
 
-def load_data(city, month, day):
+def load_data(city, month=0, day=0):
     """
     Takes user-supplied inputs, reads in csv datasets to pandas dataframes and filters on parameters
     :param city: lowercase string either 'chicago', 'new york' or 'washington'
@@ -203,9 +203,10 @@ def user_stats(df):
     print('\nCalculating User Stats...\n')
     start_time = time.time()
 
+    # remove rows with NaN values
+    df.dropna(axis=0, inplace=True)
+
     # Display counts of user types
-    # TODO: need to deal with NaN values here (ny has NaN user_types,
-    # ch and ny have NaN gender and birth year, wa has no gender or birth year)
 
     # Display counts of gender
 
