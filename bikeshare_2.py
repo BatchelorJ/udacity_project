@@ -82,20 +82,50 @@ def get_filters():
     return city, month, day
 
 
-#def load_data(city, month, day):
-#    """
-#    Loads data for the specified city and filters by month and day if applicable.
-#
-#    Args:
-#        (str) city - name of the city to analyze
-#        (str) month - name of the month to filter by, or "all" to apply no month filter
-#        (str) day - name of the day of week to filter by, or "all" to apply no day filter
-#    Returns:
-#        df - Pandas DataFrame containing city data filtered by month and day
-#    """
-#
-#
-#    return df
+def load_data(city, month, day):
+    """
+    Loads data for the specified city and filters by month and day if applicable.
+
+    Args:
+        (str) city - name of the city to analyze
+        (str) month - name of the month to filter by, or "all" to apply no month filter
+        (str) day - name of the day of week to filter by, or "all" to apply no day filter
+    Returns:
+        df - Pandas DataFrame containing city data filtered by month and day
+    """
+
+    # Specify source data depending on city input
+    if city == 'chicago':
+        city_csv = 'chicago.csv'
+    elif city == 'new york':
+        city_csv = 'new_york_city.csv'
+    elif city == 'washingt':
+        city_csv = 'washington.csv'
+    else:
+        raise NameError('no data available for city {}'.format(city))
+
+    # create pandas dataframe from csv, rename columns and cast dates to Timestamp objects
+    df = pd.read_csv('source_data\\{}'.format(city_csv))
+    df = df.rename(columns={'Unnamed: 0': 'trip_id',
+                            'Start Time': 'start_time',
+                            'End Time': 'end_time',
+                            'Trip Duration': 'trip_duration',
+                            'Start Station': 'start_station',
+                            'End Station': 'end_station',
+                            'User Type': 'user_type',
+                            'Gender': 'gender',
+                            'Birth Year': 'birth_year'})
+    df['start_time'] = pd.to_datetime(df['start_time'])
+    df['end_time'] = pd.to_datetime(df['end_time'])
+
+    # filter data based on month input
+    if not isinstance(month, int) and month not in range(0, 13):
+        raise ValueError('invalid month value: must be integer between 0 and 12')
+    elif month == 0:
+        pass    # skip filtering, return data for all months
+    else:
+        df = df[df['start_time'].dt.month == month]
+    return df
 
 
 def time_stats(df):
@@ -159,7 +189,8 @@ def user_stats(df):
     start_time = time.time()
 
     # Display counts of user types
-
+    # TODO: need to deal with NaN values here (ny has NaN user_types,
+    # ch and ny have NaN gender and birth year, wa has no gender or birth year)
 
     # Display counts of gender
 
