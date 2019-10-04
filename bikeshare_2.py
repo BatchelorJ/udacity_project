@@ -155,7 +155,7 @@ def time_stats(df):
     # display the most common start hour
 
 
-    print("\nThis took %s seconds." % round(time.time() - start_time, 2))
+    print("\nThis took %s seconds." % round(time.time() - start_time, 3))
     print('-'*40)
 
 
@@ -174,7 +174,7 @@ def station_stats(df):
     # display most frequent combination of start station and end station trip
 
 
-    print("\nThis took %s seconds." % round(time.time() - start_time, 2))
+    print("\nThis took %s seconds." % round(time.time() - start_time, 3))
     print('-'*40)
 
 
@@ -189,32 +189,45 @@ def trip_duration_stats(df):
             return str(round(stat_sec)) + ' seconds'
         elif stat_sec < 3600:
             minutes, seconds = divmod(stat_sec, 60)
-            return '{} minutes, {} seconds'.format(minutes, round(seconds))
+            return '{} minutes, {} seconds'.format(int(minutes), int(round(seconds)))
         elif stat_sec < 86400:
             hours, minutes = divmod(stat_sec, 3600)
             minutes, seconds = divmod(minutes, 60)
-            return '{} hours, {} minutes, {} seconds'.format(hours, minutes, round(seconds))
+            return '{} hours, {} minutes, {} seconds'.format(int(hours),
+                                                             int(minutes),
+                                                             int(round(seconds)))
         else:
             days, hours = divmod(stat_sec, 86400)
             hours, minutes = divmod(hours, 3600)
             minutes, seconds = divmod(minutes, 60)
-            return '{} days, {} hours, {} minutes, {} seconds'.format(days, hours, minutes, round(seconds))
+            return '{} days, {} hours, {} minutes, {} seconds'.format(int(days),
+                                                                      int(hours),
+                                                                      int(minutes),
+                                                                      int(round(seconds)))
 
     # Calculate trip statistics
-    duration_sum = df['trip_duration'].sum()
-    duration_mean = df['trip_duration'].mean()
-    duration_std = df['trip_duration'].std()
-    duration_min = df['trip_duration'].min()
-    duration_25 = df['trip_duration'].describe()['25%']
-    duration_50 = df['trip_duration'].describe()['50%']
-    duration_75 = df['trip_duration'].describe()['75%']
-    duration_max = df['trip_duration'].max()
+    duration_sum = stat_str(df['trip_duration'].sum())
+    duration_mean = stat_str(df['trip_duration'].mean())
+    duration_std = stat_str(df['trip_duration'].std())
+    duration_min = stat_str(df['trip_duration'].min())
+    duration_25 = stat_str(df['trip_duration'].describe()['25%'])
+    duration_50 = stat_str(df['trip_duration'].describe()['50%'])
+    duration_75 = stat_str(df['trip_duration'].describe()['75%'])
+    duration_max = stat_str(df['trip_duration'].max())
 
     # Print trip statistics
+    print('Trip Duration Statistics\n' + '-' * 40)
+    spacing = 17
+    print('Mean:'.ljust(spacing) + duration_mean.rjust(42))
+    print('Standard Dev:'.ljust(spacing) + duration_std.rjust(42))
+    print('Maximum:'.ljust(spacing) + duration_max.rjust(42))
+    print('Minimum:'.ljust(spacing) + duration_min.rjust(42))
+    print('25th Percentile:'.ljust(spacing) + duration_25.rjust(42))
+    print('50th Percentile:'.ljust(spacing) + duration_50.rjust(42))
+    print('75th Percentile:'.ljust(spacing) + duration_75.rjust(42))
+    print('All Trips Sum:'.ljust(spacing) + duration_sum.rjust(42))
 
-
-
-    print("\nThis took %s seconds." % round(time.time() - start_time, 2))
+    print("\nThis took %s seconds." % round(time.time() - start_time, 3))
     print('-'*40)
 
 
@@ -263,7 +276,7 @@ def user_stats(df):
     else:
         print('Sorry, no birth year data available for this city')
 
-    print("\nThis took %s seconds." % round(time.time() - start_time, 2))
+    print("\nThis took %s seconds." % round(time.time() - start_time, 3))
     print('-'*40)
 
 
@@ -274,7 +287,7 @@ def main():
 #
 #        time_stats(df)
 #        station_stats(df)
-#        trip_duration_stats(df)
+        trip_duration_stats(df)
         user_stats(df)
 #
         restart = input('\nWould you like to restart? Enter yes or no.\n')
