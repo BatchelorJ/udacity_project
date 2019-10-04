@@ -1,5 +1,6 @@
 import time
 import datetime
+from math import trunc
 import pandas as pd
 import numpy as np
 
@@ -154,7 +155,7 @@ def time_stats(df):
     # display the most common start hour
 
 
-    print("\nThis took %s seconds." % (time.time() - start_time))
+    print("\nThis took %s seconds." % round(time.time() - start_time, 2))
     print('-'*40)
 
 
@@ -173,7 +174,7 @@ def station_stats(df):
     # display most frequent combination of start station and end station trip
 
 
-    print("\nThis took %s seconds." % (time.time() - start_time))
+    print("\nThis took %s seconds." % round(time.time() - start_time, 2))
     print('-'*40)
 
 
@@ -183,13 +184,37 @@ def trip_duration_stats(df):
     print('\nCalculating Trip Duration...\n')
     start_time = time.time()
 
-    # display total travel time
+    def stat_str(stat_sec):
+        if stat_sec < 60:
+            return str(round(stat_sec)) + ' seconds'
+        elif stat_sec < 3600:
+            minutes, seconds = divmod(stat_sec, 60)
+            return '{} minutes, {} seconds'.format(minutes, round(seconds))
+        elif stat_sec < 86400:
+            hours, minutes = divmod(stat_sec, 3600)
+            minutes, seconds = divmod(minutes, 60)
+            return '{} hours, {} minutes, {} seconds'.format(hours, minutes, round(seconds))
+        else:
+            days, hours = divmod(stat_sec, 86400)
+            hours, minutes = divmod(hours, 3600)
+            minutes, seconds = divmod(minutes, 60)
+            return '{} days, {} hours, {} minutes, {} seconds'.format(days, hours, minutes, round(seconds))
+
+    # Calculate trip statistics
+    duration_sum = df['trip_duration'].sum()
+    duration_mean = df['trip_duration'].mean()
+    duration_std = df['trip_duration'].std()
+    duration_min = df['trip_duration'].min()
+    duration_25 = df['trip_duration'].describe()['25%']
+    duration_50 = df['trip_duration'].describe()['50%']
+    duration_75 = df['trip_duration'].describe()['75%']
+    duration_max = df['trip_duration'].max()
+
+    # Print trip statistics
 
 
-    # display mean travel time
 
-
-    print("\nThis took %s seconds." % (time.time() - start_time))
+    print("\nThis took %s seconds." % round(time.time() - start_time, 2))
     print('-'*40)
 
 
@@ -206,7 +231,7 @@ def user_stats(df):
         df_user = pd.concat([user_counts, user_percent], axis=1)
         df_user['Percentage'] = pd.Series(["{0:.2f}%".format(val * 100) for val in df_user['Percentage']],
                                           index=df_user.index)
-        print('User Statistics by type of user\n' + '-'*40)
+        print('User Statistics by Type of User\n' + '-'*40)
         print(df_user)
         print()
 
@@ -231,11 +256,14 @@ def user_stats(df):
         youngest = int(df['birth_year'].dropna(axis=0).max())
         oldest = int(df['birth_year'].dropna(axis=0).min())
         commonest = int(df['birth_year'].dropna(axis=0).mode()[0])
-        # TODO: print birth year
+        print('\nBirth Year Statistics\n' + '-'*40)
+        print('Oldest Birth Year is     : {}'.format(str(oldest)))
+        print('Youngest Birth Year is   : {}'.format(str(youngest)))
+        print('Most Common Birth Year is: {}'.format(str(commonest)))
     else:
         print('Sorry, no birth year data available for this city')
 
-    print("\nThis took %s seconds." % (time.time() - start_time))
+    print("\nThis took %s seconds." % round(time.time() - start_time, 2))
     print('-'*40)
 
 
@@ -243,12 +271,11 @@ def main():
     while True:
         city, month, day = get_filters()
         df = load_data(city, month, day)
-        print(df.head())
 #
 #        time_stats(df)
 #        station_stats(df)
 #        trip_duration_stats(df)
-#        user_stats(df)
+        user_stats(df)
 #
         restart = input('\nWould you like to restart? Enter yes or no.\n')
         if restart.lower() != 'yes':
