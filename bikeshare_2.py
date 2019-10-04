@@ -162,17 +162,20 @@ def time_stats(df):
 def station_stats(df):
     """Displays statistics on the most popular stations and trip."""
 
-    print('\nCalculating The Most Popular Stations and Trip...\n')
+    print('\nCalculating The Most Popular Stations and Trips...\n')
     start_time = time.time()
 
-    # display most commonly used start station
+    # display most commonly used start stations
+    print('Top 5 Start Stations by Trip Count\n' + '-'*40)
+    print(df['start_station'].value_counts().head().reset_index().to_string(header=None, index=None))
 
+    # display most commonly used end stations
+    print('Top 5 End Stations by Trip Count\n' + '-'*40)
+    print(df['end_station'].value_counts().head().reset_index().to_string(header=None, index=None))
 
-    # display most commonly used end station
-
-
-    # display most frequent combination of start station and end station trip
-
+    # display most frequent journeys (combination of start station and end station trips)
+    print('Top 5 Journeys by Trip Count\n' + '-'*40)
+    print((df['start_station'].map(str) + ' to ' + df['end_station']).value_counts().head().to_string(header=None))
 
     print("\nThis took %s seconds." % round(time.time() - start_time, 3))
     print('-'*40)
@@ -286,10 +289,10 @@ def main():
         df = load_data(city, month, day)
 #
 #        time_stats(df)
-#        station_stats(df)
+        station_stats(df)
         trip_duration_stats(df)
         user_stats(df)
-#
+
         restart = input('\nWould you like to restart? Enter yes or no.\n')
         if restart.lower() != 'yes':
             break
