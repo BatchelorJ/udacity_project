@@ -1,9 +1,20 @@
+# ----------------------------------------------------------------------
+#                          bikeshare.py
+# ----------------------------------------------------------------------
+# Author:   Josh Batchelor
+# Date:     5 October 2019
+# Purpose:  Interactively return statistics about US Bikeshare Data
+#           Completed for Udacity Project: Explore US Bikeshare Data
+#
+# ----------------------------------------------------------------------
+# Usage:    Cmd:\>python bikeshare.py
+# ----------------------------------------------------------------------
+
+
 import time
 import datetime
 import contextlib
-from math import trunc
 import pandas as pd
-import numpy as np
 
 city_data = {'chicago': 'chicago.csv',
              'new york city': 'new_york_city.csv',
@@ -41,7 +52,7 @@ def get_filters():
         months[i] = datetime.date(2019, i, 1).strftime('%B')
 
     # get input from users as either month number, month name or as all
-    # store month as integer where 0 is all and 1-12 is Jan-Dec
+    # store month as integer where 0 is all and 1-6 is Jan-Dec
     while month not in months.keys() and month != 0:
         try:
             month = input('Which month (January to June) are you interested in? (enter all for all months): ')
@@ -323,9 +334,13 @@ def main():
         # Optional output of screen text to text file
         f_out = input('\nWould you like to write these statistics to a text file? Enter yes or no.\n')
         if f_out.lower() == 'yes':
+
+            # Create Filename based on user input
             output_file = city + '_' + str(month).zfill(2) + '_' + str(day).zfill(2) + '.txt'
             with open(output_file, 'w+') as f:
-                with contextlib.redirect_stdout(f):
+                with contextlib.redirect_stdout(f):  # Redirects output to file
+
+                    # Create Descriptive File Header
                     days = {}
                     for i in range(1, 8):
                         days[i] = datetime.date(2019, 4, i).strftime('%A')
