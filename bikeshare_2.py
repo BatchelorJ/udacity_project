@@ -1,5 +1,6 @@
 import time
 import datetime
+import contextlib
 from math import trunc
 import pandas as pd
 import numpy as np
@@ -193,11 +194,11 @@ def station_stats(df):
     print(df['start_station'].value_counts().head().reset_index().to_string(header=None, index=None))
 
     # display most commonly used end stations
-    print('Top 5 End Stations by Trip Count\n' + '-'*40)
+    print('\nTop 5 End Stations by Trip Count\n' + '-'*40)
     print(df['end_station'].value_counts().head().reset_index().to_string(header=None, index=None))
 
     # display most frequent journeys (combination of start station and end station trips)
-    print('Top 5 Journeys by Trip Count\n' + '-'*40)
+    print('\nTop 5 Journeys by Trip Count\n' + '-'*40)
     print((df['start_station'].map(str) + ' to ' + df['end_station']).value_counts().head().to_string(header=None))
 
     print("\nThis took %s seconds." % round(time.time() - start_time, 3))
@@ -311,11 +312,41 @@ def main():
         city, month, day = get_filters()
         df = load_data(city, month, day)
 
-        time_stats(df, month, day)
-        station_stats(df)
-        trip_duration_stats(df)
-        user_stats(df)
+        def print_stats(df, month, day):
+            time_stats(df, month, day)
+            station_stats(df)
+            trip_duration_stats(df)
+            user_stats(df)
 
+        print_stats(df, month, day)
+
+        # Optional output of screen text to text file
+        f_out = input('\nWould you like to write these statistics to a text file? Enter yes or no.\n')
+        if f_out.lower() == 'yes':
+            output_file = city + '_' + str(month).zfill(2) + '_' + str(day).zfill(2) + '.txt'
+            with open(output_file, 'w+') as f:
+                with contextlib.redirect_stdout(f):
+                    days = {}
+                    for i in range(1, 8):
+                        days[i] = datetime.date(2019, 4, i).strftime('%A')
+                    months = {}
+                    for i in range(1, 7):
+                        months[i] = datetime.date(2019, i, 1).strftime('%B')
+                    if month == 0 and day == 0:
+                        print('Bikeshare Data for {} for all months and all days'.format(city.title()))
+                    elif month == 0:
+                        print('Bikeshare Data for {} for {}s from all months'.format(city.title(),
+                                                                                     days[day]))
+                    elif day == 0:
+                        print('Bikeshare Data for {} from {} for all days'.format(city.title(),
+                                                                                  months[month]))
+                    else:
+                        print('Bikeshare Data for {} from {} for {}s'.format(city.title(),
+                                                                             months[month],
+                                                                             days[day]))
+                    print_stats(df, month, day)
+
+        # Optional restart
         restart = input('\nWould you like to restart? Enter yes or no.\n')
         if restart.lower() != 'yes':
             break
