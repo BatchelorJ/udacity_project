@@ -140,20 +140,43 @@ def load_data(city, month=0, day=0):
     return df
 
 
-def time_stats(df):
+def time_stats(df, month=0, day=0):
     """Displays statistics on the most frequent times of travel."""
 
     print('\nCalculating The Most Frequent Times of Travel...\n')
     start_time = time.time()
 
     # display the most common month
-
+    monthsofyear = []
+    for i in range(1, 13):
+        monthsofyear.append(datetime.date(2019, i, 1).strftime('%B'))
+    if month == 0:
+        common_month = monthsofyear[int(df['start_time'].dt.month.mode().values[0])]
+        print('The most common month for starting trips is ' + common_month)
 
     # display the most common day of week
-
+    daysofweek = []
+    for i in range(1, 8):
+        daysofweek.append(datetime.date(2019, 4, i).strftime('%A'))
+    if day == 0:
+        common_day = daysofweek[int(df['start_time'].dt.dayofweek.mode().values[0])]
+        print('The most common day for starting trips is ' + common_day)
 
     # display the most common start hour
-
+    common_start = int(df['start_time'].dt.hour.mode().values[0])
+    if 0 <= common_start < 12:
+        start_interval = ('between ' +
+                          str(common_start).zfill(2) + ':00 am and ' +
+                          str(common_start + 1).zfill(2) + ':00 am')
+    elif common_start == 23:
+        start_interval = ('between ' +
+                          str(common_start - 12).zfill(2) + ':00 pm and ' +
+                          str(common_start - 11).zfill(2) + ':00 am')
+    else:
+        start_interval = ('between ' +
+                          str(common_start - 12).zfill(2) + ':00 pm and ' +
+                          str(common_start - 11).zfill(2) + ':00 pm')
+    print('The most common start period is ' + start_interval)
 
     print("\nThis took %s seconds." % round(time.time() - start_time, 3))
     print('-'*40)
@@ -287,8 +310,8 @@ def main():
     while True:
         city, month, day = get_filters()
         df = load_data(city, month, day)
-#
-#        time_stats(df)
+
+        time_stats(df, month, day)
         station_stats(df)
         trip_duration_stats(df)
         user_stats(df)
