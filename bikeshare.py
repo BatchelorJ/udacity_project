@@ -318,6 +318,23 @@ def user_stats(df):
     print('-'*40)
 
 
+def display_raw(df):
+    """
+    Interactive function to return successive 5-row blocks of Pandas Dataframe based on user input
+    :param df: Pandas Dataframe Object
+    :return: None
+    """
+    input_start = input('Would you like to see the first 5 lines of raw data? Enter yes or no')
+    if input_start.lower() == 'yes':
+        i = 0
+        while True:
+            print(df[i:i + 5].to_string())
+            i += 5
+            input_next = input('Would you like to see the next 5 lines of raw data? Enter yes or no')
+            if input_next.lower() != 'yes':
+                break
+
+
 def main():
     while True:
         city, month, day = get_filters()
@@ -360,6 +377,9 @@ def main():
                                                                              months[month],
                                                                              days[day]))
                     print_stats(df, month, day)
+
+        # Optional output of raw data to screen
+        display_raw(df)
 
         # Optional restart
         restart = input('\nWould you like to restart? Enter yes or no.\n')
